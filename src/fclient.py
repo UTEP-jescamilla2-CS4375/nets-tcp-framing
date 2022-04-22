@@ -73,8 +73,6 @@ while 1:
 
     if data is None:
         break
-    else:
-        data = data.unarch()
 
     print("Received '%s'" % data)
     '''-----END-----'''
