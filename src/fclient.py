@@ -1,10 +1,11 @@
 #! /usr/bin/env python3
 
 # Echo client program
-import socket, sys, re, time
+import socket, sys, re, time, os
 sys.path.append("../lib")       # for params
 import params
 import framer
+#import archiver
 
 switchesVarDefaults = (
     (('-s', '--server'), 'server', "127.0.0.1:50001"),
@@ -12,7 +13,7 @@ switchesVarDefaults = (
     (('-?', '--usage'), "usage", False), # boolean (set if present)
     )
 
-progname = "framedClient"
+progname = "filetransferClient"
 paramMap = params.parseParams(switchesVarDefaults)
 
 server, usage  = paramMap["server"], paramMap["usage"]
@@ -68,12 +69,12 @@ while 1:
     '''
 
     '''-----BEGIN-----'''
-    data = framer.recv_msg(s)
+    data = framer.recv_file(s)
 
     if data is None:
         break
     else:
-        data = data.decode()
+        data = data.unarch()
 
     print("Received '%s'" % data)
     '''-----END-----'''
