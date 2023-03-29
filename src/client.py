@@ -4,7 +4,7 @@
 import socket, sys, re, time, os
 sys.path.append("../lib")       # for params
 import params
-import mytar.py
+import mytar
 
 switchesVarDefaults = (
     (('-s', '--server'), 'server', "127.0.0.1:50001"),
@@ -50,7 +50,7 @@ for res in socket.getaddrinfo(serverHost, serverPort, socket.AF_UNSPEC, socket.S
 if s is None:
     print('could not open socket')
     sys.exit(1)
-    
+
 '''
 delay = float(paramMap['delay']) # delay before reading (default = 0s)
 if delay != 0:
@@ -59,16 +59,23 @@ if delay != 0:
     print("done sleeping")
 '''
 
-outMessage = "Hello world!".encode()
-while len(outMessage):
-    print("sending '%s'" % outMessage.decode())
-    bytesSent = s.send(outMessage)
-    outMessage = outMessage[bytesSent:]
+# this is just a test file for demonstration purposes. Uncomment to test.
+# ofd = os.open('ffile', os.O_WRONLY | os.O_CREAT)
 
+# uses the archiver to frame the files to be sent
+ffile = mytar.c(['file'])
+
+# sends the framed files and displays message 
+while len(ffile):
+    print("sending '%s'" % ffile)
+    bytesSent = s.send(ffile)
+    ffile = ffile[bytesSent:]
+
+'''    
 data = s.recv(1024).decode()
 print("Received '%s'" % data)
 
-'''
+
 outMessage = "Hello world!"
 while len(outMessage):
     print("sending '%s'" % outMessage)
@@ -76,30 +83,19 @@ while len(outMessage):
     outMessage = outMessage[bytesSent:]
 '''
 
-# s.shutdown(socket.SHUT_WR)      # no more output
+    
+s.shutdown(socket.SHUT_WR)      # no more output
 
-
+'''
+# this is the echoing portion
 while 1:
 
-    
     # the original code from demo
     data = s.recv(1024).decode()
     print("Received '%s'" % data)
     if len(data) == 0:
         break
- 
-
-    '''
-    # -----BEGIN-----
-    data = framer.recv_file(s)
-
-    if data is None:
-        break
-
-    print("Received '%s'" % data)
-    # -----END-----
-    '''
-    
+   
 print("Zero length read.  Closing")
 s.close()
-
+'''

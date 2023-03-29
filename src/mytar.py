@@ -68,7 +68,7 @@ def read_from_fd(fd, n=100):
     return contents
 
 
-def c(files, ofd=1):
+def c(files):
     '''
     name: c is the "create" function similar to tar\'s'
     input:
@@ -76,8 +76,10 @@ def c(files, ofd=1):
       fd = file descriptor to write to. default is stdout
     output: a single file
     '''
-    print(f'files to print are {files}')
-    print(f'file descriptor to print to is fd = {ofd}')
+    #print(f'files to print are {files}')
+    #print(f'file descriptor to print to is fd = {ofd}')
+
+    ffile = bytearray()
     
     for file in files:                                        # names of files to process
         try:
@@ -91,40 +93,31 @@ def c(files, ofd=1):
             fcontents = framed_write(contents)                # frame contents from input fd
             fdata += fcontents                                # add framed contents to byte array
 
-            os.write(ofd, fdata)                              # send data to output fd
-            os.close(ifd)                                     # done with input file descriptor
+            ffile += fdata
+
+            os.close(ifd)
 
         except:
             print('File does not exist')
 
-    os.close(ofd)                                             # close output stream
+    return ffile
 
     
-def x(file):
+def x(ffile):
     '''
-    input: ifd is input file descriptor (default 0)
-        data from ifd should be framed data
-    output: ofd is output file descriptor (default 1)
+    input: ffile is bytearray. It should be framed data
     '''
-    try:
+    fdata = ffile
+    
+    while len(fdata) > 0:
 
-        ifd = os.open(file, os.O_RDONLY)
-        fdata = read_from_fd(ifd)
-
-        while len(fdata) > 0:
-
-            data, fdata = framed_read(fdata)               # read 2 pieces of framed data (filename, contents)
-
-            ofd = os.open(data[0], os.O_WRONLY | os.O_CREAT)  # create file to write to if necessary
-            os.write(ofd, data[1])
-            os.close(ofd)
-
-        os.close(ifd)                                         # done with the archived file
-            
-    except FileNotFoundError:
-        os.write(1, f'{file}: File not found. Exiting...'.encode())
+        data, fdata = framed_read(fdata)                        # read 2 pieces of framed data (filename, contents)
+        ofd = os.open("t" + data[0], os.O_WRONLY | os.O_CREAT)  # create file to write to if necessary
+        os.write(ofd, data[1])
+        os.close(ofd)         
         
-    
+
+'''        
 if sys.argv[1] == '-help':
     print('To archive: c <file1> [file2] [output.tar]')
     print('To unarchive: x < input.tar')
@@ -145,3 +138,4 @@ elif sys.argv[1] == 'x':
 
 else:
     print('unable to use archiver. Type -help to check syntax.')
+'''
